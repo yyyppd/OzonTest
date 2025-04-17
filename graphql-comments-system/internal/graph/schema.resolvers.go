@@ -12,6 +12,7 @@ import (
 
 	godataloader "github.com/graph-gophers/dataloader"
 	"github.com/yyyppd/graphql-comments-system/internal/comment"
+	"github.com/yyyppd/graphql-comments-system/internal/config"
 	localdataloader "github.com/yyyppd/graphql-comments-system/internal/graph/dataloader"
 	"github.com/yyyppd/graphql-comments-system/internal/graph/model"
 	"github.com/yyyppd/graphql-comments-system/pkg/utils"
@@ -65,6 +66,10 @@ func (r *mutationResolver) CreatePost(ctx context.Context, title string, content
 
 // CreateComment is the resolver for the createComment field.
 func (r *mutationResolver) CreateComment(ctx context.Context, postID string, parentID *string, content string) (*model.Comment, error) {
+	if len(content) > config.MaxCommentLength {
+		return nil, fmt.Errorf("comment too long: maximum is %d characters", config.MaxCommentLength)
+	}
+
 	pid, err := strconv.Atoi(postID)
 	if err != nil {
 		return nil, fmt.Errorf("invalid post ID")
